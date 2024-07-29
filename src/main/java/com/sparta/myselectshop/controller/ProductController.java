@@ -16,7 +16,7 @@ public class ProductController {
 
     private final ProductService productService;
 
-    // 검색하기
+    // 관심상품으로 저장하기
     @PostMapping("/products")
     public ProductResponseDto createProduct(@RequestBody ProductRequestDto requestDto) {
         return productService.createProduct(requestDto);
