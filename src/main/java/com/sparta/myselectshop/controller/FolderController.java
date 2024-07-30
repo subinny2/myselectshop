@@ -1,14 +1,12 @@
 package com.sparta.myselectshop.controller;
 
 import com.sparta.myselectshop.dto.FolderRequestDto;
+import com.sparta.myselectshop.dto.FolderResponseDto;
 import com.sparta.myselectshop.security.UserDetailsImpl;
 import com.sparta.myselectshop.service.FolderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -24,6 +22,12 @@ public class FolderController {
         // Body 부분에 폴더를 여러개 받아오니까 RequestBody                       인증객체에서 뽑아온다.
         List<String> folderNames = folderRequestDto.getFolderNames();
         folderService.addFolders(folderNames, userDetails.getUser());
+    }
+
+    // 사용자가 생서한 폴더조회
+    @GetMapping("/folders")
+    public List<FolderResponseDto> getFolders(@AuthenticationPrincipal UserDetailsImpl userDetails){
+        return folderService.getFolders(userDetails.getUser());
     }
 
 
