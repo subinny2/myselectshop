@@ -110,4 +110,20 @@ public class ProductService {
         // 4) 상품에 폴더를 추가합니다.
         productFolderRepository.save(new ProductFolder(product, folder));
     }
+
+    public Page<ProductResponseDto> getProductsInFolder(Long folderId, int page, int size, String sortBy, boolean isAsc, User user) {
+
+        // 페이징정렬
+        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = Sort.by(direction, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        // 쿼리 메소드
+        Page<Product> productList = productRepository.findAllByUserAndProductFolderList_FolderId(user, folderId, pageable);
+
+        // map을 사용하여 responseDto타입으로 변환
+        Page<ProductResponseDto> responseDtoList = productList.map(ProductResponseDto::new);
+
+        return responseDtoList;
+    }
 }
