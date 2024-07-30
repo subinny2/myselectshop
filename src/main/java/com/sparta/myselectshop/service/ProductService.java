@@ -51,6 +51,7 @@ public class ProductService {
 
     // 회원별 모아보기
     // 관리자라면 보여야한다.
+    @Transactional(readOnly = true)
     public Page<ProductResponseDto> getProducts(User user, int page, int size, String sortBy, boolean isAsc) {
 
         Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
