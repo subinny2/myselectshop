@@ -5,9 +5,14 @@ import com.sparta.myselectshop.dto.ProductRequestDto;
 import com.sparta.myselectshop.dto.ProductResponseDto;
 import com.sparta.myselectshop.entity.Product;
 import com.sparta.myselectshop.entity.User;
+import com.sparta.myselectshop.entity.UserRoleEnum;
 import com.sparta.myselectshop.naver.dto.ItemDto;
 import com.sparta.myselectshop.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,15 +49,27 @@ public class ProductService {
         return new ProductResponseDto(product);
     }
 
-    public List<ProductResponseDto> getProducts(User user) {
-        List<Product> productList  = productRepository.findAllByUser(user); // user 별로 다 가져온다.
-        List<ProductResponseDto> responseDtoList = new ArrayList<>();
+    // 회원별 모아보기
+    // 관리자라면 보여야한다.
+    public Page<ProductResponseDto> getProducts(User user, int page, int size, String sortBy, boolean isAsc) {
 
-        for (Product product : productList) {
-            responseDtoList.add(new ProductResponseDto(product));
+        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = Sort.by(direction, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        // 로그인을 해서 요청한 권한정보가 담긴다.
+        UserRoleEnum userRoleEnum = user.getRole();
+
+        Page<Product> productList;
+
+        if(userRoleEnum == UserRoleEnum.USER){ // 권한정보가 user라면
+            productList = productRepository.findAllByUser(user, pageable);
+        } else { // 그게아니라면 (관리자라면)
+            productList = productRepository.findAll(pageable);
         }
 
-        return responseDtoList;
+        // ProductResponseDto를 하나씩 돌리면서 productList로 넣어준다.
+        return productList.map(ProductResponseDto::new);
     }
 
     @Transactional
@@ -64,16 +81,4 @@ public class ProductService {
 
     }
 
-    // 관리자 계정일때는 모두 조회이므로 findAll() 사용
-    public List<ProductResponseDto> getAllProducts() {
-        List<Product> productList  = productRepository.findAll();
-        List<ProductResponseDto> responseDtoList = new ArrayList<>();
-
-        for (Product product : productList) {
-            responseDtoList.add(new ProductResponseDto(product));
-        }
-
-        return responseDtoList;
-
-    }
 }
